@@ -1,11 +1,13 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using EcommerceLiveEfCore.Models;
+using EcommerceLiveEfCore.ViewModels;
+using EcommerceLiveEfCore.Data;
 
 namespace EcommerceLiveEfCore.Controllers;
 
 public class HomeController : Controller
 {
+
     private readonly ILogger<HomeController> _logger;
 
     public HomeController(ILogger<HomeController> logger)

@@ -1,0 +1,17 @@
+﻿@model ProductsListViewModel
+
+@{
+    ViewData["Title"] = "All products";
+}
+
+@if(Model.Products != null && Model.Products.Any())
+{
+    @foreach(var product in Model.Products)
+    {
+        <div>@product.Name</div>
+    }
+}
+else
+{
+    <p class="text-danger">No products found</p>
+}
