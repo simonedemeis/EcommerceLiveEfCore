@@ -1,17 +1,43 @@
 ﻿@model ProductsListViewModel
 
 @{
-    ViewData["Title"] = "All products";
+    ViewData["Title"] = "Products list";
 }
 
-@if(Model.Products != null && Model.Products.Any())
+@if(TempData["Error"] != null)
 {
-    @foreach(var product in Model.Products)
-    {
-        <div>@product.Name</div>
-    }
+    <p class="text-danger">@TempData["Error"]</p>
+}
+
+<a class="btn btn-primary" asp-controller="Product" asp-action="Add">Add new product</a>
+
+@if(Model.Products.Count() > 0)
+{
+    <table>
+        <thead>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th>Actions</th>
+        </thead>
+        <tbody>
+            @foreach (var product in Model.Products)
+            {
+                <tr>
+                    <td>@product.Name</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price</td>
+                    <td>@product.Category</td>
+                    <td>
+                        <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" >Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
 else
 {
-    <p class="text-danger">No products found</p>
+    <p class="text-danger">No products found!</p>
 }

@@ -1,5 +1,6 @@
-﻿using EcommerceLiveEfCore.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using EcommerceLiveEfCore.Services;
+using EcommerceLiveEfCore.ViewModels;
 using System.Threading.Tasks;
 
 namespace EcommerceLiveEfCore.Controllers
@@ -10,8 +11,7 @@ namespace EcommerceLiveEfCore.Controllers
 
         public ProductController(ProductService productService)
         {
-            //inietto il servizio all'interno del controller
-            _productService = productService;
+            this._productService = productService;
         }
 
         public async Task<IActionResult> Index()
@@ -19,6 +19,76 @@ namespace EcommerceLiveEfCore.Controllers
             var productsList = await _productService.GetAllProductsAsync();
 
             return View(productsList);
+        }
+
+        public IActionResult Add()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Add(AddProductViewModel addProductViewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Error while saving entity to database";
+                return RedirectToAction("Index");
+            }
+
+            var result = await _productService.AddProductAsync(addProductViewModel);
+
+            if (!result)
+            {
+                TempData["Error"] = "Error while saving entity to database";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [Route("product/details/{id:guid}")]
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var details = await _productService.GetProductByIdAsync(id);
+
+            if(details.Name == null)
+            {
+                TempData["Error"] = "Error while finding entity on database";
+                return RedirectToAction("Index");
+            }
+
+            return View(details);
+        }
+
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var result = await _productService.DeleteProductByIdAsync(id);
+
+            if (!result)
+            {
+                TempData["Error"] = "Error while deleting entity from database";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var product = await _productService.GetProductByIdAsync(id);
+
+            return View(product);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(ProductDetailsViewModel productDetailsViewModel)
+        {
+            var result = await _productService.UpdateProductAsync(productDetailsViewModel);
+
+            if (!result)
+            {
+                TempData["Error"] = "Error while updating entity on database";
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

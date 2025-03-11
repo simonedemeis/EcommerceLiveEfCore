@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using EcommerceLiveEfCore.ViewModels;
-using EcommerceLiveEfCore.Data;
 
 namespace EcommerceLiveEfCore.Controllers;
 

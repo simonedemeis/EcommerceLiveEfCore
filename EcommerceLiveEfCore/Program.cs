@@ -7,13 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-//recupero la stringa di connessione
-var connectionstring = builder.Configuration.GetConnectionString("DefaultConnection");
-
-//iniettiamo il dbcontext nel container dei servizi
-builder.Services.AddDbContext<EcommerceLiveEfCoreDbContext>(options =>
-    //scelgo il provider di database da utilizzare (UseSqlServer, UseMySql, UsePostgreSql...)
-    options.UseSqlServer(connectionstring)
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
 builder.Services.AddScoped<ProductService>();
