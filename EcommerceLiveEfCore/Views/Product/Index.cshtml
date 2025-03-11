@@ -11,7 +11,7 @@
 
 <a class="btn btn-primary" asp-controller="Product" asp-action="Add">Add new product</a>
 
-@if(Model.Products.Count() > 0)
+@if(Model.Products != null && Model.Products.Count() > 0)
 {
     <table>
         <thead>

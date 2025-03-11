@@ -41,8 +41,15 @@ namespace EcommerceLiveEfCore.Services
         {
             var productsList = new ProductsListViewModel();
 
-            productsList.Products = await _context.Products.ToListAsync();
-
+            try
+            {
+                productsList.Products = await _context.Products.ToListAsync();
+            }
+            catch
+            {
+                productsList.Products = null;
+            }
+            
             return productsList;
         }
 
@@ -62,25 +69,16 @@ namespace EcommerceLiveEfCore.Services
             return await SaveAsync();
         }
 
-        public async Task<ProductDetailsViewModel> GetProductByIdAsync(Guid id)
+        public async Task<Product?> GetProductByIdAsync(Guid id)
         {
             var product = await _context.Products.FindAsync(id);
 
             if(product == null)
             {
-                return new ProductDetailsViewModel();
+                return null;
             }
 
-            var details = new ProductDetailsViewModel()
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Category = product.Category
-            };
-
-            return details;
+            return product;
         }
 
         public async Task<bool> DeleteProductByIdAsync(Guid id)
@@ -97,19 +95,19 @@ namespace EcommerceLiveEfCore.Services
             return await SaveAsync();
         }
 
-        public async Task<bool> UpdateProductAsync(ProductDetailsViewModel productDetailsViewModel)
+        public async Task<bool> UpdateProductAsync(EditProductViewModel editProductViewModel)
         {
-            var product = await _context.Products.FindAsync(productDetailsViewModel.Id);
+            var product = await _context.Products.FindAsync(editProductViewModel.Id);
 
             if(product == null)
             {
                 return false;
             }
 
-            product.Name = productDetailsViewModel.Name;
-            product.Description = productDetailsViewModel.Description;
-            product.Price = productDetailsViewModel.Price;
-            product.Category = productDetailsViewModel.Category;
+            product.Name = editProductViewModel.Name;
+            product.Description = editProductViewModel.Description;
+            product.Price = editProductViewModel.Price;
+            product.Category = editProductViewModel.Category;
 
             return await SaveAsync();
         }

@@ -4,6 +4,6 @@ namespace EcommerceLiveEfCore.ViewModels
 {
     public class ProductsListViewModel
     {
-        public List<Product> Products { get; set; }
+        public List<Product>? Products { get; set; }
     }
 }

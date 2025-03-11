@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using EcommerceLiveEfCore.Services;
 using EcommerceLiveEfCore.ViewModels;
-using System.Threading.Tasks;
 
 namespace EcommerceLiveEfCore.Controllers
 {
@@ -48,15 +47,24 @@ namespace EcommerceLiveEfCore.Controllers
         [Route("product/details/{id:guid}")]
         public async Task<IActionResult> Details(Guid id)
         {
-            var details = await _productService.GetProductByIdAsync(id);
+            var product = await _productService.GetProductByIdAsync(id);
 
-            if(details.Name == null)
+            if (product == null)
             {
                 TempData["Error"] = "Error while finding entity on database";
                 return RedirectToAction("Index");
             }
 
-            return View(details);
+            var productDetailsViewModel = new ProductDetailsViewModel()
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Category = product.Category
+            };
+
+            return View(productDetailsViewModel);
         }
 
         public async Task<IActionResult> Delete(Guid id)
@@ -75,13 +83,27 @@ namespace EcommerceLiveEfCore.Controllers
         {
             var product = await _productService.GetProductByIdAsync(id);
 
-            return View(product);
+            if(product == null)
+            {
+                return RedirectToAction("Index");
+            };
+
+            var editProductViewModel = new EditProductViewModel()
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Category = product.Category
+            };
+
+            return View(editProductViewModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(ProductDetailsViewModel productDetailsViewModel)
+        public async Task<IActionResult> Edit(EditProductViewModel editProductViewModel)
         {
-            var result = await _productService.UpdateProductAsync(productDetailsViewModel);
+            var result = await _productService.UpdateProductAsync(editProductViewModel);
 
             if (!result)
             {
