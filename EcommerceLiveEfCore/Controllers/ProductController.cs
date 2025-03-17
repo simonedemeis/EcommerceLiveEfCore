@@ -13,11 +13,17 @@ namespace EcommerceLiveEfCore.Controllers
             this._productService = productService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpGet("product/get-all")]
+        public async Task<IActionResult> ListProducts()
         {
             var productsList = await _productService.GetAllProductsAsync();
 
-            return View(productsList);
+            return PartialView("_ProductsList", productsList);
         }
 
         public IActionResult Add()
@@ -64,7 +70,7 @@ namespace EcommerceLiveEfCore.Controllers
                 Category = product.Category
             };
 
-            return View(productDetailsViewModel);
+            return Json(productDetailsViewModel);
         }
 
         public async Task<IActionResult> Delete(Guid id)
@@ -79,7 +85,7 @@ namespace EcommerceLiveEfCore.Controllers
             return RedirectToAction("Index");
         }
 
-        public async Task<IActionResult> Edit(Guid id)
+        public async Task<IActionResult> Edit([FromQuery]Guid id)
         {
             var product = await _productService.GetProductByIdAsync(id);
 

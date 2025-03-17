@@ -1,5 +1,4 @@
-﻿@model ProductsListViewModel
-
+﻿
 @{
     ViewData["Title"] = "Products list";
 }
@@ -11,33 +10,90 @@
 
 <a class="btn btn-primary" asp-controller="Product" asp-action="Add">Add new product</a>
 
-@if(Model.Products != null && Model.Products.Count() > 0)
-{
-    <table>
-        <thead>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Category</th>
-            <th>Actions</th>
-        </thead>
-        <tbody>
-            @foreach (var product in Model.Products)
-            {
-                <tr>
-                    <td>@product.Name</td>
-                    <td>@product.Description</td>
-                    <td>@product.Price</td>
-                    <td>@product.Category</td>
-                    <td>
-                        <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" >Details</a>
-                    </td>
-                </tr>
+<hr/>
+
+<div id="tableContainer" class="container"></div>
+
+<div id="detailsModal" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="detailsTitle" class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div  class="modal-body">
+                <p id="detailsBody"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        document.addEventListener("DOMContentLoaded", () => {
+            let tableContainer = document.getElementById('tableContainer');
+
+            if(tableContainer){
+                fetch("product/get-all", {
+                    method: "GET"
+                })
+                .then(response => {
+                    if(response.ok){
+                        return response.text();
+                    }
+                })
+                .then(response => {
+                    
+                    tableContainer.innerHTML = response
+
+                    new DataTable('#productsTable', {
+                        ordering: true,
+                        columnDefs: [
+                            {
+                                orderable: true
+                            }
+                        ]
+                    });
+                })
             }
-        </tbody>
-    </table>
-}
-else
-{
-    <p class="text-danger">No products found!</p>
+        });
+
+        async function showDetailsModal(id){
+
+            // fetch(`product/details/${id}`)
+            // //il metodo json() trasforma le stringhe json in oggetti javascript. Il contrario si può effettuare tramite JSON.stringify()
+            // .then(response => response.ok && response.json())
+            // .then(response => {
+            //    showModal(response);
+            // })
+
+
+            let response = await fetch(`product/details/${id}`);
+
+            if(response.ok){
+                var detailsObj = await response.json();
+                showModal(detailsObj);
+            }
+            
+        }
+
+        function showModal(response){
+
+                let detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
+
+                let title = document.getElementById('detailsTitle');
+                let body = document.getElementById('detailsBody');
+
+                title.textContent = response.name;
+                body.textContent = response.description;
+
+                detailsModal.show();
+        }
+        
+    </script>
 }

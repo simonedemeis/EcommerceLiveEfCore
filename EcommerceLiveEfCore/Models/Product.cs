@@ -22,5 +22,7 @@ namespace EcommerceLiveEfCore.Models
 
         [Required]
         public required string Category { get; set; }
+
+        public DateOnly CreatedAt { get; set; }
     }
 }
