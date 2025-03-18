@@ -8,25 +8,57 @@
     <p class="text-danger">@TempData["Error"]</p>
 }
 
-<a class="btn btn-primary" asp-controller="Product" asp-action="Add">Add new product</a>
+<div class="container">
+    <button class="btn btn-primary btn-sm" style="margin-left: 12px" onclick="showAddModal()">Add new product</button>
+    <div id="tableContainer" class="container"></div>
+</div>
 
-<hr/>
-
-<div id="tableContainer" class="container"></div>
-
-<div id="detailsModal" class="modal" tabindex="-1">
+<div id="editModal" class="modal fade" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 id="detailsTitle" class="modal-title"></h5>
+                <h5 class="modal-title">Edit Product</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div  class="modal-body">
-                <p id="detailsBody"></p>
+            <div id="editBody" class="modal-body">
+                
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm delete product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Do you relly want to delete the product?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deleteProductButton">Delete</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="addModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="addBody" class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -36,6 +68,10 @@
     <script>
 
         document.addEventListener("DOMContentLoaded", () => {
+           loadList();
+        });
+
+        function loadList(){
             let tableContainer = document.getElementById('tableContainer');
 
             if(tableContainer){
@@ -48,52 +84,128 @@
                     }
                 })
                 .then(response => {
-                    
+
                     tableContainer.innerHTML = response
 
-                    new DataTable('#productsTable', {
-                        ordering: true,
-                        columnDefs: [
-                            {
-                                orderable: true
-                            }
-                        ]
-                    });
+                    new DataTable('#productsTable');
                 })
             }
-        });
+        }
 
-        async function showDetailsModal(id){
+        function showEditModal(id){
+            fetch(`Product/Edit/${id}`)
+            //il metodo json() trasforma le stringhe json in oggetti javascript. Il contrario si può effettuare tramite JSON.stringify()
+            .then(response => response.text())
+            .then(response => {
+               const modalComponent = document.getElementById('editModal');
 
-            // fetch(`product/details/${id}`)
-            // //il metodo json() trasforma le stringhe json in oggetti javascript. Il contrario si può effettuare tramite JSON.stringify()
-            // .then(response => response.ok && response.json())
-            // .then(response => {
-            //    showModal(response);
-            // })
+                if(modalComponent){
+                    let editModal = new bootstrap.Modal(modalComponent);
+                    let body = document.getElementById('editBody');
+                    if(body){
+                        body.innerHTML = response;
+                    }
+                    editModal.show();
+                }
+            })
+        }
 
+        async function sendEditForm(){
+            const form = document.getElementById('editForm');
 
-            let response = await fetch(`product/details/${id}`);
+            if(form){
+                //trasformo il form, considerando tutti i sui campi, in un oggetto di tipo FormData da inviare alla action di tipo Post
+                const formData = new FormData(form);
 
-            if(response.ok){
-                var detailsObj = await response.json();
-                showModal(detailsObj);
+                const result = await fetch('product/edit/save', {
+                    method: "POST",
+                    body: formData
+                })
+
+                const response = await result.json();
+
+                if(response.success){
+                    const editModal = document.getElementById('editModal');
+
+                    if(editModal){
+                        const editModalInstance = bootstrap.Modal.getInstance(editModal);
+                        editModalInstance.hide();
+                        loadList();
+                    }
+                }
+
             }
-            
         }
 
-        function showModal(response){
-
-                let detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
-
-                let title = document.getElementById('detailsTitle');
-                let body = document.getElementById('detailsBody');
-
-                title.textContent = response.name;
-                body.textContent = response.description;
-
-                detailsModal.show();
+        function showDeleteModal(id){
+            const deleteModal = document.getElementById('deleteModal');
+            if(deleteModal){
+                const deleteModalComponent = new bootstrap.Modal(deleteModal);
+                deleteModalComponent.show();
+                const deleteBtn = document.getElementById('deleteProductButton');
+                if(deleteBtn){
+                    deleteBtn.onclick = () => deleteProduct(id)
+                }
+            }
         }
-        
+
+        async function deleteProduct(id){
+            const result = await fetch(`Product/Delete/${id}`, {
+                method: "POST"
+            })
+
+            const response = await result.json();
+
+            if(response.success){
+                const deleteModal = document.getElementById('deleteModal');
+                if(deleteModal){
+                    const deleteModalComponent = bootstrap.Modal.getInstance(deleteModal);
+                    deleteModalComponent.hide();
+                    loadList();
+                }
+            }
+        }
+
+        async function showAddModal(){
+            const addModal = document.getElementById('addModal');
+            if(addModal){
+                const addModalComponent = new bootstrap.Modal(addModal);
+                const result = await fetch('Product/Add')
+                const response = await result.text()
+
+                const body = document.getElementById('addBody');
+
+                if(body){
+                    body.innerHTML = response;
+                }
+
+                addModalComponent.show();
+            }
+        }
+
+        async function sendAddForm(){
+            const form = document.getElementById('addForm');
+            if(form){
+                const formData = new FormData(form);
+
+                const result = await fetch('Product/Add', {
+                    method: "POST",
+                    body: formData
+                });
+
+                const response = await result.json();
+
+                if(response.success){
+                    const addModal = document.getElementById('addModal');
+                    if(addModal){
+                        const addModalComponent = bootstrap.Modal.getInstance(addModal);
+                        addModalComponent.hide();
+                        loadList();
+                    }
+                }
+
+            }
+        }
+
     </script>
 }

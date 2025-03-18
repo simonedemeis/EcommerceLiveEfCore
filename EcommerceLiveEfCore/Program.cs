@@ -12,6 +12,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<LoggerService>();
+
+LoggerService.ConfigureLogger();
 
 var app = builder.Build();
 

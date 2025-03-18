@@ -3,7 +3,7 @@
 
 @if (Model.Products != null && Model.Products.Count() > 0)
 {
-    <table id="productsTable" class="table table-striped">
+    <table id="productsTable" class="table table-striped table-hover table table-bordered">
         <thead>
         <th>Name</th>
         <th>Description</th>
@@ -20,7 +20,8 @@
                     <td>@product.Price</td>
                     <td>@product.Category</td>
                     <td>
-                        <button onclick="showDetailsModal('@product.Id')">Details</button>
+                        <button class="btn btn-sm btn-warning" onclick="showEditModal('@product.Id')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="showDeleteModal('@product.Id')">Delete</button>
                     </td>
                 </tr>
             }

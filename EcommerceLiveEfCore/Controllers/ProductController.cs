@@ -7,10 +7,12 @@ namespace EcommerceLiveEfCore.Controllers
     public class ProductController : Controller
     {
         private readonly ProductService _productService;
+        private readonly LoggerService _loggerService;
 
-        public ProductController(ProductService productService)
+        public ProductController(ProductService productService, LoggerService loggerService)
         {
             this._productService = productService;
+            _loggerService = loggerService;
         }
 
         public IActionResult Index()
@@ -28,7 +30,7 @@ namespace EcommerceLiveEfCore.Controllers
 
         public IActionResult Add()
         {
-            return View();
+            return PartialView("_AddForm");
         }
 
         [HttpPost]
@@ -36,56 +38,89 @@ namespace EcommerceLiveEfCore.Controllers
         {
             if (!ModelState.IsValid)
             {
-                TempData["Error"] = "Error while saving entity to database";
-                return RedirectToAction("Index");
+                return Json(new
+                {
+                    success = false,
+                    message = "Error while saving entity to database"
+                });
             }
 
             var result = await _productService.AddProductAsync(addProductViewModel);
 
             if (!result)
             {
-                TempData["Error"] = "Error while saving entity to database";
+                return Json(new
+                {
+                    success = false,
+                    message = "Error while saving entity to database"
+                });
             }
 
-            return RedirectToAction("Index");
+            string logmessage = "Entity saved successfully to database";
+
+            _loggerService.LogInformation(logmessage);
+            return Json(new
+            {
+                success = true,
+                message = logmessage
+            });
         }
 
-        [Route("product/details/{id:guid}")]
-        public async Task<IActionResult> Details(Guid id)
-        {
-            var product = await _productService.GetProductByIdAsync(id);
+        //[Route("product/details/{id:guid}")]
+        //public async Task<IActionResult> Details(Guid id)
+        //{
+        //    var product = await _productService.GetProductByIdAsync(id);
 
-            if (product == null)
-            {
-                TempData["Error"] = "Error while finding entity on database";
-                return RedirectToAction("Index");
-            }
+        //    if (product == null)
+        //    {
+        //        return Json(new
+        //        {
+        //            success = false,
+        //            message = "No product found"
+        //        });
+        //    }
 
-            var productDetailsViewModel = new ProductDetailsViewModel()
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Category = product.Category
-            };
+        //    var productDetailsViewModel = new ProductDetailsViewModel()
+        //    {
+        //        Id = product.Id,
+        //        Name = product.Name,
+        //        Description = product.Description,
+        //        Price = product.Price,
+        //        Category = product.Category
+        //    };
 
-            return Json(productDetailsViewModel);
-        }
+        //    return Json(new
+        //    {
+        //        success = true,
+        //        data = productDetailsViewModel
+        //    });
+        //}
 
+        [HttpPost]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _productService.DeleteProductByIdAsync(id);
 
             if (!result)
             {
-                TempData["Error"] = "Error while deleting entity from database";
+                return Json(new
+                {
+                    success = false,
+                    message = "Error while deleting entity"
+                });
             }
 
-            return RedirectToAction("Index");
+            string logmessage = "Entity deleted successfully";
+            _loggerService.LogInformation(logmessage);
+
+            return Json(new
+            {
+                success = true,
+                message = logmessage
+            });
         }
 
-        public async Task<IActionResult> Edit([FromQuery]Guid id)
+        public async Task<IActionResult> Edit(Guid id)
         {
             var product = await _productService.GetProductByIdAsync(id);
 
@@ -103,20 +138,31 @@ namespace EcommerceLiveEfCore.Controllers
                 Category = product.Category
             };
 
-            return View(editProductViewModel);
+            return PartialView("_EditForm", editProductViewModel);
         }
 
-        [HttpPost]
+        [HttpPost("product/edit/save")]
         public async Task<IActionResult> Edit(EditProductViewModel editProductViewModel)
         {
             var result = await _productService.UpdateProductAsync(editProductViewModel);
 
             if (!result)
             {
-                TempData["Error"] = "Error while updating entity on database";
+                return Json(new
+                {
+                    success = false,
+                    message = "Error while updating entity on database"
+                });
             }
 
-            return RedirectToAction("Index");
+            string logmessage = "Entity updated successfully";
+            _loggerService.LogInformation(logmessage);
+
+            return Json(new
+            {
+                success = true,
+                message = logmessage
+            }); ;
         }
     }
 }
