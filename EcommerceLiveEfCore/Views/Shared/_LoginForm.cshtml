@@ -1,0 +1,17 @@
+@model LoginViewModel
+
+<form id="loginForm">
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input type="email" asp-for="Email" class="form-control" placeholder="Enter your email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label">Password</label>
+        <input type="password" asp-for="Password" class="form-control" placeholder="Enter your password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    
+    <button type="button" class="btn btn-primary w-100" onclick="sendLoginData()">Login</button>
+</form>

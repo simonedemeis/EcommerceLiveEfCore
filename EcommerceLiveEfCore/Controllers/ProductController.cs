@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using EcommerceLiveEfCore.Services;
 using EcommerceLiveEfCore.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EcommerceLiveEfCore.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProductController : Controller
     {
         private readonly ProductService _productService;
@@ -15,6 +17,7 @@ namespace EcommerceLiveEfCore.Controllers
             _loggerService = loggerService;
         }
 
+        [Authorize]
         public IActionResult Index()
         {
             return View();
@@ -45,7 +48,7 @@ namespace EcommerceLiveEfCore.Controllers
                 });
             }
 
-            var result = await _productService.AddProductAsync(addProductViewModel);
+            var result = await _productService.AddProductAsync(addProductViewModel, User);
 
             if (!result)
             {
@@ -65,36 +68,6 @@ namespace EcommerceLiveEfCore.Controllers
                 message = logmessage
             });
         }
-
-        //[Route("product/details/{id:guid}")]
-        //public async Task<IActionResult> Details(Guid id)
-        //{
-        //    var product = await _productService.GetProductByIdAsync(id);
-
-        //    if (product == null)
-        //    {
-        //        return Json(new
-        //        {
-        //            success = false,
-        //            message = "No product found"
-        //        });
-        //    }
-
-        //    var productDetailsViewModel = new ProductDetailsViewModel()
-        //    {
-        //        Id = product.Id,
-        //        Name = product.Name,
-        //        Description = product.Description,
-        //        Price = product.Price,
-        //        Category = product.Category
-        //    };
-
-        //    return Json(new
-        //    {
-        //        success = true,
-        //        data = productDetailsViewModel
-        //    });
-        //}
 
         [HttpPost]
         public async Task<IActionResult> Delete(Guid id)

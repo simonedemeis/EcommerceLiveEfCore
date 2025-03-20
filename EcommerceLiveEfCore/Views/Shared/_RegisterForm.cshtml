@@ -1,0 +1,41 @@
+@model RegisterViewModel
+
+<form id="registerForm">
+    <div class="mb-3">
+        <label asp-for="FirstName" class="form-label">First Name</label>
+        <input asp-for="FirstName" class="form-control" placeholder="Enter your first name" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="LastName" class="form-label">Last Name</label>
+        <input asp-for="LastName" class="form-control" placeholder="Enter your last name" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input type="email" asp-for="Email" class="form-control" placeholder="Enter your email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="BirthDate" class="form-label">Birth Date</label>
+        <input type="date" asp-for="BirthDate" class="form-control" />
+        <span asp-validation-for="BirthDate" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label">Password</label>
+        <input type="password" asp-for="Password" class="form-control" placeholder="Enter your password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+        <input type="password" asp-for="ConfirmPassword" class="form-control" placeholder="Confirm your password" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+    
+    <button type="button" onclick="sendRegisterData()" class="btn btn-primary w-100">Register</button>
+</form>

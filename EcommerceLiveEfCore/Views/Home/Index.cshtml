@@ -6,3 +6,125 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+
+<div id="registerModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Register</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="registerBody" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="loginModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Login</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="loginBody" class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        function enableValidation(body){
+            if (window.jQuery && window.jQuery.validator){
+                window.jQuery.validator.unobtrusive.parse(body)
+            }
+        }
+        
+        function validate(form){
+            if (!window.jQuery(form).valid()){
+                return false;
+            }
+            return true;
+        }
+        
+        async function showRegisterModal()
+        {
+            const registerModal = document.getElementById('registerModal');
+            if(registerModal){
+                const modalComponent = new bootstrap.Modal(registerModal);
+                const response = await fetch('/Account/Register/');
+                const result = await response.text();
+                const body = document.getElementById('registerBody');
+                if(body){
+                    body.innerHTML = result;
+                    enableValidation(body);
+                    modalComponent.show();
+                }
+            }
+        }
+        
+        async function showLoginModal(){
+            const loginModal = document.getElementById('loginModal');
+            if(loginModal){
+                const modalComponent = new bootstrap.Modal(loginModal);
+                const response = await fetch('/Account/Login/');
+                const result = await response.text();
+                const body = document.getElementById('loginBody');
+                if(body){
+                    body.innerHTML = result;
+                    enableValidation(body);
+                    modalComponent.show();
+                }
+            }
+        }
+        
+        async function sendRegisterData(){
+            const form = document.getElementById('registerForm');
+            if (form){
+                if (!validate(form)){
+                    return;
+                }
+                const formData = new FormData(form);
+                const response = await fetch('Account/Register/', {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.success){
+                    const modal = document.getElementById('registerModal');
+                    const modalComponent = bootstrap.Modal.getInstance(modal);
+                    modalComponent.hide();
+                }
+            }
+        }
+
+        async function sendLoginData(){
+            const form = document.getElementById('loginForm');
+            if (form){
+                if (!validate(form)){
+                    return;
+                }
+                const formData = new FormData(form);
+                const response = await fetch('Account/Login/', {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.success){
+                    const modal = document.getElementById('loginModal');
+                    const modalComponent = bootstrap.Modal.getInstance(modal);
+                    modalComponent.hide();
+                    setTimeout(()=> {
+                        location.reload();
+                    },1000)
+                }
+            }
+        }
+        
+    
+    </script>
+    
+}

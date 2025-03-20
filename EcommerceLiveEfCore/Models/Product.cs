@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EcommerceLiveEfCore.Models
 {
@@ -24,5 +25,9 @@ namespace EcommerceLiveEfCore.Models
         public required string Category { get; set; }
 
         public DateOnly CreatedAt { get; set; }
+        
+        public string? UserId { get; set; }
+        [ForeignKey("UserId")]
+        public ApplicationUser User { get; set; }
     }
 }

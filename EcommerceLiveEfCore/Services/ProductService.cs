@@ -3,6 +3,8 @@ using EcommerceLiveEfCore.Models;
 using EcommerceLiveEfCore.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace EcommerceLiveEfCore.Services
 {
@@ -11,11 +13,12 @@ namespace EcommerceLiveEfCore.Services
 
         private readonly ApplicationDbContext _context;
         private readonly LoggerService _loggerService;
-
-        public ProductService(ApplicationDbContext context, LoggerService loggerService)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public ProductService(ApplicationDbContext context, LoggerService loggerService, UserManager<ApplicationUser> userManager)
         {
             this._context = context;
             this._loggerService = loggerService;
+            this._userManager = userManager;
         }
 
         private async Task<bool> SaveAsync()
@@ -46,7 +49,7 @@ namespace EcommerceLiveEfCore.Services
 
             try
             {
-                productsList.Products = await _context.Products.ToListAsync();
+                productsList.Products = await _context.Products.Include(p => p.User).ToListAsync();
                 _loggerService.LogInformation("Products list requested by admin");
             }
             catch(Exception ex)
@@ -58,17 +61,20 @@ namespace EcommerceLiveEfCore.Services
             return productsList;
         }
 
-        public async Task<bool> AddProductAsync(AddProductViewModel addProductViewModel)
+        public async Task<bool> AddProductAsync(AddProductViewModel addProductViewModel, ClaimsPrincipal userPrincipal)
         {
             try
             {
+                var user = await _userManager.FindByEmailAsync(userPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value);
+                
                 var product = new Product()
                 {
                     Id = Guid.NewGuid(),
                     Name = addProductViewModel.Name,
                     Description = addProductViewModel.Description,
                     Price = addProductViewModel.Price,
-                    Category = addProductViewModel.Category
+                    Category = addProductViewModel.Category,
+                    UserId = user.Id
                 };
 
                 _context.Products.Add(product);
